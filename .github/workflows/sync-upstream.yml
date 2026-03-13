@@ -1,0 +1,81 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: '15 */2 * * *'  # Every 2 hours (offset 15min from RSR)
+  workflow_dispatch:          # Manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: git remote add upstream https://github.com/FFXIV-CombatReborn/BossmodReborn.git
+
+      - name: Fetch upstream
+        run: git fetch upstream main
+
+      - name: Check for new upstream commits
+        id: check
+        run: |
+          BEHIND=$(git rev-list --count HEAD..upstream/main)
+          echo "behind=$BEHIND" >> "$GITHUB_OUTPUT"
+          echo "Upstream is $BEHIND commits ahead"
+
+      - name: Merge upstream (keep our changes on conflict)
+        if: steps.check.outputs.behind != '0'
+        id: merge
+        run: |
+          # Merge with ours strategy for conflicts = our changes win
+          if git merge upstream/main -m "Merge upstream changes" --strategy-option ours; then
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          else
+            # If merge still fails, abort and notify
+            git merge --abort
+            echo "status=conflict" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine next version tag
+        if: steps.merge.outputs.status == 'success'
+        id: version
+        run: |
+          # Get latest tag matching x.x.x.x pattern
+          LATEST=$(git tag --list '*.*.*.*' --sort=-version:refname | head -1)
+          if [ -z "$LATEST" ]; then
+            NEXT="7.4.5.1"
+          else
+            # Increment last digit
+            BASE=$(echo "$LATEST" | sed 's/\.[0-9]*$//')
+            PATCH=$(echo "$LATEST" | sed 's/.*\.//')
+            NEXT="${BASE}.$((PATCH + 1))"
+          fi
+          echo "tag=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "Next version: $NEXT"
+
+      - name: Push and tag
+        if: steps.merge.outputs.status == 'success'
+        run: |
+          git push origin main
+          git tag ${{ steps.version.outputs.tag }}
+          git push origin ${{ steps.version.outputs.tag }}
+
+      - name: Warn on conflict
+        if: steps.merge.outputs.status == 'conflict'
+        run: |
+          echo "::warning::Upstream merge had unresolvable conflicts. Manual intervention needed."
+          exit 1
