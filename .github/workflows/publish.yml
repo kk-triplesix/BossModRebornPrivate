@@ -55,7 +55,7 @@ jobs:
                      "FFXIVClientStructs.dll")
           $existing = $names | ForEach-Object { Join-Path $outDir $_ } | Where-Object { Test-Path $_ }
           Write-Host "Zipping: $($existing -join ', ')"
-          Compress-Archive -Path $existing -DestinationPath .\latest.zip
+          Compress-Archive -Path $existing -DestinationPath .\latest.zip -Force
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
