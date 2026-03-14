@@ -259,6 +259,192 @@ sealed class IPCProvider : IDisposable
             autorotation.Hints.ImminentSpecialMode.mode != AIHints.SpecialMode.Normal
                 ? autorotation.Hints.ImminentSpecialMode.activation.ToString("o")
                 : null);
+
+        // --- Encounters IPC: list all registered boss encounters ---
+
+        // Returns JSON array of all registered boss encounters:
+        // [{ "OID": uint, "BossName": string, "GroupName": string, "Category": string, "Expansion": string, "GroupType": string, "SortOrder": int }]
+        Register("Encounters.GetAll", () =>
+        {
+            var arr = new JsonArray();
+            foreach (var (oid, info) in BossModuleRegistry.RegisteredModules)
+            {
+                if (info.Maturity < BossModuleInfo.Maturity.Contributed)
+                    continue; // Skip WIP modules
+
+                string bossName;
+                string groupName;
+                try
+                {
+                    bossName = ResolveBossName(info);
+                    groupName = ResolveGroupName(info);
+                }
+                catch
+                {
+                    bossName = info.ModuleType.Name;
+                    groupName = info.GroupType.ToString();
+                }
+
+                arr.Add(new JsonObject
+                {
+                    ["OID"] = oid,
+                    ["BossName"] = bossName,
+                    ["GroupName"] = groupName,
+                    ["Category"] = info.Category.ToString(),
+                    ["Expansion"] = info.Expansion.ToString(),
+                    ["GroupType"] = info.GroupType.ToString(),
+                    ["SortOrder"] = info.SortOrder
+                });
+            }
+            return arr.ToJsonString();
+        });
+
+        // Returns timeline phases for a specific encounter OID (offline, no active fight needed)
+        Register("Encounters.GetPhasesForOID", (uint oid) =>
+        {
+            var module = BossModuleRegistry.CreateModuleForTimeline(oid);
+            if (module == null) return "[]";
+            var tree = new StateMachineTree(module.StateMachine);
+            tree.ApplyTimings(null);
+            var arr = new JsonArray();
+            foreach (var phase in tree.Phases)
+            {
+                arr.Add(new JsonObject
+                {
+                    ["Name"] = phase.Name,
+                    ["StartTime"] = phase.StartTime,
+                    ["Duration"] = phase.Duration,
+                    ["MaxTime"] = phase.MaxTime
+                });
+            }
+            return arr.ToJsonString();
+        });
+
+        // Returns timeline states with mechanic flags for a specific encounter OID (offline)
+        Register("Encounters.GetStatesForOID", (uint oid) =>
+        {
+            var module = BossModuleRegistry.CreateModuleForTimeline(oid);
+            if (module == null) return "[]";
+            var tree = new StateMachineTree(module.StateMachine);
+            tree.ApplyTimings(null);
+            var arr = new JsonArray();
+            foreach (var phase in tree.Phases)
+            {
+                foreach (var node in phase.BranchNodes(0))
+                {
+                    var hint = node.State.EndHint;
+                    arr.Add(new JsonObject
+                    {
+                        ["ID"] = node.State.ID,
+                        ["PhaseID"] = node.PhaseID,
+                        ["Time"] = phase.StartTime + node.Time,
+                        ["Duration"] = node.State.Duration,
+                        ["Name"] = node.State.Name,
+                        ["Comment"] = node.State.Comment,
+                        ["IsRaidwide"] = hint.HasFlag(StateMachine.StateHint.Raidwide),
+                        ["IsTankbuster"] = hint.HasFlag(StateMachine.StateHint.Tankbuster),
+                        ["IsKnockback"] = hint.HasFlag(StateMachine.StateHint.Knockback),
+                        ["IsDowntime"] = node.IsDowntime,
+                        ["IsPositioning"] = node.IsPositioning,
+                        ["IsVulnerable"] = node.IsVulnerable,
+                        ["BossIsCasting"] = node.BossIsCasting
+                    });
+                }
+            }
+            return arr.ToJsonString();
+        });
+
+        // Returns total duration for a specific encounter OID (offline)
+        Register("Encounters.GetTotalDuration", (uint oid) =>
+        {
+            var module = BossModuleRegistry.CreateModuleForTimeline(oid);
+            if (module == null) return 0f;
+            var tree = new StateMachineTree(module.StateMachine);
+            tree.ApplyTimings(null);
+            return tree.TotalMaxTime;
+        });
+
+        // --- Timeline IPC: expose fight state machine data for rotation planners ---
+
+        // Whether a boss module with an active state machine is currently loaded
+        Register("Timeline.IsActive", () => autorotation.Bossmods.ActiveModule?.StateMachine.ActiveState != null);
+
+        // Returns JSON with encounter info: { "OID": uint, "Name": string, "TotalDuration": float }
+        // Returns null if no active module
+        Register("Timeline.GetEncounter", () =>
+        {
+            var module = autorotation.Bossmods.ActiveModule;
+            if (module == null)
+                return null;
+            var sm = module.StateMachine;
+            var tree = new StateMachineTree(sm);
+            tree.ApplyTimings(null);
+            var obj = new JsonObject
+            {
+                ["OID"] = module.PrimaryActor.OID,
+                ["Name"] = module.Info?.GroupType.ToString() ?? module.GetType().Name,
+                ["TotalDuration"] = tree.TotalMaxTime
+            };
+            return obj.ToJsonString();
+        });
+
+        // Returns JSON array of phases: [{ "Name", "StartTime", "Duration", "MaxTime" }]
+        Register("Timeline.GetPhases", () =>
+        {
+            var module = autorotation.Bossmods.ActiveModule;
+            if (module == null)
+                return "[]";
+            var tree = new StateMachineTree(module.StateMachine);
+            tree.ApplyTimings(null);
+            var arr = new JsonArray();
+            foreach (var phase in tree.Phases)
+            {
+                arr.Add(new JsonObject
+                {
+                    ["Name"] = phase.Name,
+                    ["StartTime"] = phase.StartTime,
+                    ["Duration"] = phase.Duration,
+                    ["MaxTime"] = phase.MaxTime
+                });
+            }
+            return arr.ToJsonString();
+        });
+
+        // Returns JSON array of states with mechanic flags:
+        // [{ "ID", "PhaseID", "Time", "Duration", "Name", "Comment", "IsRaidwide", "IsTankbuster", "IsKnockback", "IsDowntime", "IsPositioning", "IsVulnerable", "BossIsCasting" }]
+        Register("Timeline.GetStates", () =>
+        {
+            var module = autorotation.Bossmods.ActiveModule;
+            if (module == null)
+                return "[]";
+            var tree = new StateMachineTree(module.StateMachine);
+            tree.ApplyTimings(null);
+            var arr = new JsonArray();
+            foreach (var phase in tree.Phases)
+            {
+                foreach (var node in phase.BranchNodes(0))
+                {
+                    var hint = node.State.EndHint;
+                    arr.Add(new JsonObject
+                    {
+                        ["ID"] = node.State.ID,
+                        ["PhaseID"] = node.PhaseID,
+                        ["Time"] = phase.StartTime + node.Time,
+                        ["Duration"] = node.State.Duration,
+                        ["Name"] = node.State.Name,
+                        ["Comment"] = node.State.Comment,
+                        ["IsRaidwide"] = hint.HasFlag(StateMachine.StateHint.Raidwide),
+                        ["IsTankbuster"] = hint.HasFlag(StateMachine.StateHint.Tankbuster),
+                        ["IsKnockback"] = hint.HasFlag(StateMachine.StateHint.Knockback),
+                        ["IsDowntime"] = node.IsDowntime,
+                        ["IsPositioning"] = node.IsPositioning,
+                        ["IsVulnerable"] = node.IsVulnerable,
+                        ["BossIsCasting"] = node.BossIsCasting
+                    });
+                }
+            }
+            return arr.ToJsonString();
+        });
     }
 
     public void Dispose() => _disposeActions?.Invoke();
@@ -318,4 +504,44 @@ sealed class IPCProvider : IDisposable
         p.RegisterAction(func);
         _disposeActions += p.UnregisterAction;
     }
+
+    private static string ResolveBossName(BossModuleRegistry.Info info)
+    {
+        if (info.NameID == 0)
+            return info.ModuleType.Name;
+
+        return info.GroupType switch
+        {
+            BossModuleInfo.GroupType.CriticalEngagement or BossModuleInfo.GroupType.BozjaDuel
+                => Service.LuminaRow<Lumina.Excel.Sheets.DynamicEvent>(info.NameID)?.Name.ToString() ?? info.ModuleType.Name,
+            BossModuleInfo.GroupType.EurekaNM or BossModuleInfo.GroupType.ForayFATE
+                => Service.LuminaRow<Lumina.Excel.Sheets.Fate>(info.NameID)?.Name.ToString() ?? info.ModuleType.Name,
+            _ => FixCase(Service.LuminaRow<Lumina.Excel.Sheets.BNpcName>(info.NameID)?.Singular.ToString() ?? info.ModuleType.Name)
+        };
+    }
+
+    private static string ResolveGroupName(BossModuleRegistry.Info info)
+    {
+        return info.GroupType switch
+        {
+            BossModuleInfo.GroupType.CFC or BossModuleInfo.GroupType.MaskedCarnivale or BossModuleInfo.GroupType.RemovedUnreal
+            or BossModuleInfo.GroupType.BaldesionArsenal or BossModuleInfo.GroupType.CastrumLacusLitore
+            or BossModuleInfo.GroupType.TheDalriada or BossModuleInfo.GroupType.TheForkedTowerBlood
+            or BossModuleInfo.GroupType.CriticalEngagement or BossModuleInfo.GroupType.BozjaDuel
+            or BossModuleInfo.GroupType.EurekaNM
+                => FixCase(Service.LuminaRow<Lumina.Excel.Sheets.ContentFinderCondition>(info.GroupID)?.Name.ToString() ?? info.GroupType.ToString()),
+            BossModuleInfo.GroupType.Quest
+                => Service.LuminaRow<Lumina.Excel.Sheets.Quest>(info.GroupID)?.Name.ToString() ?? "Quest",
+            BossModuleInfo.GroupType.Fate or BossModuleInfo.GroupType.ForayFATE
+                => Service.LuminaRow<Lumina.Excel.Sheets.Fate>(info.GroupID)?.Name.ToString() ?? "FATE",
+            BossModuleInfo.GroupType.Hunt
+                => $"{info.Expansion.ShortName()} Hunt {(BossModuleInfo.HuntRank)info.GroupID}",
+            BossModuleInfo.GroupType.GoldSaucer
+                => Service.LuminaRow<Lumina.Excel.Sheets.GoldSaucerTextData>(info.GroupID)?.Text.ToString() ?? "Gold Saucer",
+            _ => info.Category.ToString()
+        };
+    }
+
+    private static string FixCase(string str)
+        => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(str);
 }
