@@ -66,7 +66,7 @@ sealed class AquaSpear(BossModule module) : Components.GenericAOEs(module)
     {
         if (spell.Action.ID == (uint)AID.AquaSpear)
         {
-            _aoes.Add(new(new AOEShapeRect(8f, 4f), caster.Position));
+            _aoes.Add(new(new AOEShapeRect(4f, 4f, 4f), caster.Position));
         }
     }
     public override void OnActorDestroyed(Actor actor)
