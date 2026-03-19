@@ -57,7 +57,7 @@ jobs:
           # Get latest tag matching x.x.x.x pattern
           LATEST=$(git tag --list '*.*.*.*' --sort=-version:refname | head -1)
           if [ -z "$LATEST" ]; then
-            NEXT="7.4.5.1"
+            NEXT="7.4.5.11"
           else
             # Increment last digit
             BASE=$(echo "$LATEST" | sed 's/\.[0-9]*$//')
