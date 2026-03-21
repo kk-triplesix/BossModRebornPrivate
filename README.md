@@ -1,25 +1,49 @@
-**BossmodReborn**
+# BMR KK's Special
 
-![Github Latest Releases](https://img.shields.io/github/downloads/FFXIV-CombatReborn/BossmodReborn/latest/total.svg?style=for-the-badge)
+A private fork of [BossModReborn](https://github.com/FFXIV-CombatReborn/BossmodReborn) by the FFXIV Combat Reborn team.
 
-BossmodReborn is a community-driven fork of the original Bossmod plugin for Final Fantasy XIV. It aims to enhance your gameplay by providing real-time tactical guidance and tools that simplify complex raid mechanics. This tool is invaluable for optimizing in-game strategies, ensuring precise positioning, and enhancing overall raid performance.
+I absolutely love and appreciate the original project — the Combat Reborn team has done an incredible job building and maintaining BossModReborn. This fork exists solely because I needed a few very specific customizations for my own personal use.
 
-## Features
+---
 
-- **Advanced Radar System**: A sophisticated on-screen map displaying player and boss positions, imminent AOEs, and other crucial mechanics. This system helps players visualize the battlefield, simplifying decision-making processes.
-- **Mechanic Descriptors**: Near the radar, you’ll find clear, concise descriptions of upcoming mechanics, global hints for resolving current challenges, and personalized player advice to optimize your response to each situation.
-- **Cooldown Planner**: A tool for meticulous planning of ability usage, ensuring optimal timing for cooldowns and abilities in coordination with raid strategies.
-- **User-Friendly Interface**: Designed with accessibility in mind with a wonderful module viewer by Croizat, the interface is intuitive, allowing players of all skill levels to benefit from the plugin.
-- **Regular Updates**: Committed to staying current with the latest game patches, class updates, and community feedback. PRs will be reviewed, tested, and approved.
+## What's Different
 
-## Want to contribute?
+### Extended IPC Layer
 
-- Create a fork
-- Make your changes
-- Test the changes
-- Create a PR and point it to main
+Deep integration with [RotationSolverReborn](https://github.com/FFXIV-CombatReborn/RotationSolverReborn) through custom IPC endpoints:
 
-## Fork for CN client
-- A fork for players on the CN client can be found on https://github.com/44451516-ff14/BossmodRebornCN.
-- It is not directly supported by the Combat Reborn Team, so any bugs exclusive to that fork need to be fixed by the fork maintainer.
-- Bugs that likely affect both BossmodReborn and the CN fork can still be reported to the Combat Reborn Team.
+- **Encounters IPC** — exposes encounter data (phases, mechanics, timings) for external rotation planners
+- **AIHints IPC** — channels for raidwide/tankbuster/stack predictions, SpecialMode, and ForbiddenDirections
+- **ActionQueue IPC** — `HasEntries` method for rotation solver coordination
+- **Configuration IPC** — `LastModified` tracking for external config consumers
+- **Preset Management** — full CRUD for rotation presets, active preset control, strategy management
+- Gaze/Pyretic RSR integration for automatic rotation pausing
+
+### WIP Boss Modules
+
+Unreleased Dawntrail encounter modules in progress:
+
+- **Criterion:** Darya the Sea Maid (AlluringOrder, AquaSpear, CeaselessCurrent, EchoedSerenade, SeaShackles)
+- **Advanced:** Darya the Sea Maid, Lone Swordmaster, Pari of Plenty
+- **Variant:** Darya the Sea Maid, Lone Swordmaster
+- **Savage:** Enhanced M12S P1 Lindwurm (GrotesquerieAct1), M11N, M09S, M10S
+
+### Plugin Branding
+
+- Renamed to "BMR (KK's Special)"
+- Author set to kk-triplesix
+
+### Automated Upstream Sync
+
+- Syncs with the original repo every 2 hours automatically
+- Preserves all local changes on conflict (merge strategy: ours)
+- Auto-increments version tags
+- Custom CI/CD pipeline with release artifact generation
+
+---
+
+## Credits & Thanks
+
+Huge thanks to the **FFXIV Combat Reborn team** for creating and maintaining the original [BossModReborn](https://github.com/FFXIV-CombatReborn/BossmodReborn). Their work is the foundation this fork is built on.
+
+Original repository: https://github.com/FFXIV-CombatReborn/BossmodReborn
