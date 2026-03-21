@@ -1,9 +1,9 @@
 {
-  "Author": "The Combat Reborn Team",
-  "Name": "BossMod Reborn",
+  "Author": "kk-triplesix",
+  "Name": "BMR KK's Special",
   "InternalName": "BossModReborn",
-  "RepoUrl": "https://github.com/FFXIV-CombatReborn/BossmodReborn",
-  "Description": "A bunch of utilities to simplify boss mechanics",
+  "RepoUrl": "https://github.com/kk-triplesix/BossModRebornPrivate",
+  "Description": "Private fork of BossModReborn with extended IPC, custom modules, and RSR integration.",
   "ApplicableVersion": "any",
   "Tags": [
     "combat",
@@ -21,11 +21,11 @@
   "LoadPriority": 0,
   "IsTestingExclusive": false,
   "IconUrl": "https://raw.githubusercontent.com/FFXIV-CombatReborn/RebornAssets/main/IconAssets/BMR_Icon.png",
-  "Punchline": "Don't fail at raid mechanics anymore",
+  "Punchline": "KK's custom boss mod with extended IPC and RSR integration.",
   "AcceptsFeedback": true,
   "ImageUrls": [
-    "https://raw.githubusercontent.com/FFXIV-CombatReborn/BossmodReborn/master/Data/image1.png",
-    "https://raw.githubusercontent.com/FFXIV-CombatReborn/BossmodReborn/master/Data/image2.png",
-    "https://raw.githubusercontent.com/FFXIV-CombatReborn/BossmodReborn/master/Data/image3.png"
+    "https://raw.githubusercontent.com/kk-triplesix/BossModRebornPrivate/main/Data/image1.png",
+    "https://raw.githubusercontent.com/kk-triplesix/BossModRebornPrivate/main/Data/image2.png",
+    "https://raw.githubusercontent.com/kk-triplesix/BossModRebornPrivate/main/Data/image3.png"
   ]
 }

@@ -18,8 +18,8 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
     {
         using var wrap = ImRaii.TextWrapPos(0);
 
-        ImGui.TextUnformatted("BossModReborn (BMR) provides boss fight radar, auto-rotation, cooldown planning, and AI. All of its modules can be toggled individually. Support for it can be found in the Discord server linked at the bottom of this tab.");
-        ImGui.TextUnformatted("This is a FORK of the original BossMod (VBM). Only ask for support on the Combat Reborn Discord.");
+        ImGui.TextUnformatted("BMR KK's Special — a private fork of BossModReborn with extended IPC integration, custom boss modules, and deep RotationSolverReborn coordination.");
+        ImGui.TextUnformatted("Based on the incredible work of the Combat Reborn team. Original project: github.com/FFXIV-CombatReborn/BossmodReborn");
         ImGui.TextUnformatted("Please also make sure to not load VBM and this fork at the same time. The consequences of doing that are unexplored and unsupported.");
         ImGui.Spacing();
         DrawSection("Radar",
@@ -68,8 +68,8 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
             if (ImGui.Button("Combat Reborn Discord", new(220, 0)))
                 _lastErrorMessage = OpenLink("https://discord.gg/p54TZMPnC9");
         ImGui.SameLine();
-        if (ImGui.Button("BossModReborn GitHub", new(220, 0)))
-            _lastErrorMessage = OpenLink("https://github.com/FFXIV-CombatReborn/BossmodReborn");
+        if (ImGui.Button("BMR KK's Special GitHub", new(220, 0)))
+            _lastErrorMessage = OpenLink("https://github.com/kk-triplesix/BossModRebornPrivate");
         ImGui.SameLine();
         if (ImGui.Button("BossMod Wiki", new(130, 0)))
             _lastErrorMessage = OpenLink("https://github.com/awgil/ffxiv_bossmod/wiki");

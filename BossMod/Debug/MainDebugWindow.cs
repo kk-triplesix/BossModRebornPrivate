@@ -11,7 +11,7 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 
 namespace BossMod;
 
-sealed class MainDebugWindow(WorldState ws, RotationModuleManager autorot, ZoneModuleManager zmm, ActionManagerEx amex, MovementOverride move, AIHintsBuilder hintBuilder, IDalamudPluginInterface dalamud) : UIWindow("Boss mod debug UI", false, new(300, 200))
+sealed class MainDebugWindow(WorldState ws, RotationModuleManager autorot, ZoneModuleManager zmm, ActionManagerEx amex, MovementOverride move, AIHintsBuilder hintBuilder, IDalamudPluginInterface dalamud) : UIWindow("BMR KK's Special debug UI", false, new(300, 200))
 {
     private readonly DebugObstacles _debugObstacles = new(hintBuilder.Obstacles, dalamud);
     private readonly DebugObjects _debugObjects = new();

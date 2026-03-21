@@ -14,7 +14,7 @@ namespace BossMod;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    public string Name => "BossMod Reborn";
+    public string Name => "BMR KK's Special";
 
     private readonly ICommandManager CommandManager;
 
@@ -79,7 +79,7 @@ public sealed class Plugin : IDalamudPlugin
         Service.Config.Modified.Subscribe(() => Task.Run(() => Service.Config.SaveToFile(dalamud.ConfigFile)));
 
         CommandManager = commandManager;
-        CommandManager.AddHandler("/bmr", new CommandInfo(OnCommand) { HelpMessage = "Show boss mod settings UI" });
+        CommandManager.AddHandler("/bmr", new CommandInfo(OnCommand) { HelpMessage = "Show BMR KK's Special settings UI" });
 
         ActionDefinitions.Instance.UnlockCheck = QuestUnlocked; // ensure action definitions are initialized and set unlock check functor (we don't really store the quest progress in clientstate, for now at least)
 
@@ -246,7 +246,7 @@ public sealed class Plugin : IDalamudPlugin
     private void OpenConfigUI(string showTab = "")
     {
         _configUI.ShowTab(showTab);
-        _ = new UISimpleWindow("BossModReborn", _configUI.Draw, true, new(300, 300));
+        _ = new UISimpleWindow("BMR KK's Special", _configUI.Draw, true, new(300, 300));
     }
 
     private void DrawUI()
