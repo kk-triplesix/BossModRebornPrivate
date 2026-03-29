@@ -28,7 +28,7 @@ jobs:
         run: git remote add upstream https://github.com/FFXIV-CombatReborn/BossmodReborn.git
 
       - name: Fetch upstream
-        run: git fetch upstream main
+        run: git fetch --no-recurse-submodules upstream main
 
       - name: Check for upstream changes
         id: check
