@@ -67,6 +67,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PLUGIN_REPO_TOKEN }}
-          repository: kk-triplesix/DalamudPlugins
+          repository: kk-triplesix-private/DalamudPlugins
           event-type: plugin-updated
           client-payload: '{"plugin": "BossModReborn", "version": "${{ env.tag }}"}'

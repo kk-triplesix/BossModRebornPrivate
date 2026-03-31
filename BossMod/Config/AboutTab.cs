@@ -69,7 +69,7 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
                 _lastErrorMessage = OpenLink("https://discord.gg/p54TZMPnC9");
         ImGui.SameLine();
         if (ImGui.Button("BMR KK's Special GitHub", new(220, 0)))
-            _lastErrorMessage = OpenLink("https://github.com/kk-triplesix/BossModRebornPrivate");
+            _lastErrorMessage = OpenLink("https://github.com/kk-triplesix-private/BMR-kk-special");
         ImGui.SameLine();
         if (ImGui.Button("BossMod Wiki", new(130, 0)))
             _lastErrorMessage = OpenLink("https://github.com/awgil/ffxiv_bossmod/wiki");

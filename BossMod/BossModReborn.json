@@ -6,11 +6,11 @@
   "DalamudApiLevel": 14,
   "Punchline": "KK's custom boss mod with extended IPC and RSR integration.",
   "Description": "Private fork of BossModReborn with extended IPC, custom modules, and RSR integration.",
-  "RepoUrl": "https://github.com/kk-triplesix/BossModRebornPrivate",
+  "RepoUrl": "https://github.com/kk-triplesix-private/BMR-kk-special",
   "IconUrl": "https://raw.githubusercontent.com/FFXIV-CombatReborn/RebornAssets/main/IconAssets/BMR_Icon.png",
   "ImageUrls": [
-    "https://raw.githubusercontent.com/kk-triplesix/BossModRebornPrivate/main/Data/image1.png",
-    "https://raw.githubusercontent.com/kk-triplesix/BossModRebornPrivate/main/Data/image2.png",
-    "https://raw.githubusercontent.com/kk-triplesix/BossModRebornPrivate/main/Data/image3.png"
+    "https://raw.githubusercontent.com/kk-triplesix-private/BMR-kk-special/main/Data/image1.png",
+    "https://raw.githubusercontent.com/kk-triplesix-private/BMR-kk-special/main/Data/image2.png",
+    "https://raw.githubusercontent.com/kk-triplesix-private/BMR-kk-special/main/Data/image3.png"
   ]
 }
